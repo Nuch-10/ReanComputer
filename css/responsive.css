@@ -1,0 +1,80 @@
+/* Shared mobile/tablet layout safeguards */
+@media (max-width: 1100px) {
+  .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid-5 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .hero-visual { min-height: 400px; }
+  .layout-two > * { min-width: 0; }
+}
+
+@media (max-width: 1100px) {
+  .how-grid { grid-template-columns: repeat(3, minmax(0,1fr)); }
+  .course-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .stats-row { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .layout-two { grid-template-columns: 1fr; }
+  .sidebar-panel { position: static; }
+  .footer-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+}
+
+@media (max-width: 840px) {
+  .navbar { gap: 12px; }
+  .brand { min-width: 0; }
+  .brand-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .nav-actions { margin-left: auto; }
+  .nav-actions > .btn { display: none; }
+  .nav-links { display: none; }
+  .mobile-menu-toggle { display: inline-flex !important; }
+  .navbar { position: relative; }
+  .nav-panel {
+    position: absolute; left: 0; right: 0; top: calc(100% + 10px); background: var(--surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); padding: 18px; display: none;
+    z-index: 110;
+  }
+  .nav-panel.open { display: block; }
+  .nav-panel .nav-links { display: grid; gap: 8px; }
+  .nav-panel .nav-links a { display: block; }
+  .hero-grid { grid-template-columns: 1fr; }
+  .grid-3 { grid-template-columns: 1fr; }
+  .grid-4, .grid-5 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .progress-overview { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .achievement-grid { grid-template-columns: 1fr; }
+  .practice-grid { grid-template-columns: 1fr; }
+  .content-panel, .practice-panel, .quiz-card { padding: 24px; }
+  .table-wrap, .table-responsive { overflow-x: auto; max-width: 100%; }
+  table { min-width: 620px; }
+}
+
+@media (max-width: 640px) {
+  .container { width: min(100% - 24px, 1200px); }
+  .navbar { min-height: 70px; }
+  .brand-mark { width: 40px; height: 40px; border-radius: 12px; }
+  .brand { font-size: 1rem; gap: 8px; }
+  .brand-text small { display: none; }
+  .nav-actions { gap: 8px; min-width: 0; flex: 1; justify-content: flex-end; }
+  .search-wrap { flex: 1; min-width: 0; }
+  .search-wrap input { width: 100%; min-width: 0; padding-left: 38px; }
+  .search-results { left: 0; right: auto; width: min(360px, calc(100vw - 24px)); }
+  .icon-btn { flex: 0 0 40px; width: 40px; height: 40px; }
+  .hero { padding-top: 50px; }
+  .hero h1 { font-size: clamp(2rem, 9vw, 3rem); }
+  .hero p { font-size: 1rem; }
+  .hero-visual { min-height: 300px; padding: 16px; }
+  .illustration { min-height: 250px; }
+  .badge { padding: 8px 10px; font-size: .78rem; }
+  .badge-1 { left: 4%; top: 10%; }
+  .badge-2 { right: 4%; bottom: 10%; }
+  .badge-3 { left: 7%; bottom: 20%; }
+  .hero-actions { flex-direction: column; align-items: stretch; }
+  .btn { width: 100%; }
+  .stats-row, .how-grid, .course-grid, .progress-overview, .footer-grid, .grid-4, .grid-5 { grid-template-columns: 1fr; }
+  .lesson-actions { flex-direction: column-reverse; }
+  .lesson-actions .btn { width: 100%; }
+  .content-panel, .practice-panel, .quiz-card { padding: 18px; }
+  .page-shell { padding: 28px 0 56px; }
+  .page-hero { padding: 26px 0 18px; }
+  .sidebar-panel { padding: 14px; }
+  .lesson-list { max-height: 280px; overflow-y: auto; }
+  .panel-head { align-items: flex-start; flex-direction: column; }
+  .mini-form { align-items: stretch; }
+  .mini-form > * { width: 100%; }
+  .course-card .course-cover { height: 140px; }
+  .section { padding: 72px 0; }
+}
