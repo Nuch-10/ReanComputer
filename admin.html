@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="km">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ផ្ទាំងគ្រប់គ្រង | រៀនកុំព្យូទ័រ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family/Noto+Sans+Khmer:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+  </head>
+  <body data-page="admin">
+    <header class="topbar"><div class="container navbar"><a class="brand" href="index.html"><span class="brand-mark"><i class="fa-solid fa-laptop"></i></span><span class="brand-text">រៀនកុំព្យូទ័រ<small>ផ្ទាំងគ្រប់គ្រង</small></span></a><div class="nav-actions"><button id="themeToggle" class="icon-btn" aria-label="Toggle dark mode"><i class="fa-solid fa-moon"></i></button><a class="btn btn-secondary" href="index.html">មើលគេហទំព័រ</a></div></div></header>
+    <main class="admin-page">
+      <div class="container">
+        <div id="adminGuard"></div>
+        <div id="adminApp" class="hidden">
+          <div class="admin-heading"><div><span class="kicker">គ្រប់គ្រងខ្លឹមសារ និងសិស្ស</span><h1>ផ្ទាំងគ្រប់គ្រង</h1></div><button id="adminLogout" class="btn btn-secondary" type="button"><i class="fa-solid fa-right-from-bracket"></i> ចេញ</button></div>
+          <div class="progress-overview">
+            <div class="progress-card"><strong id="statUsers">0</strong><span>សិស្ស</span></div>
+            <div class="progress-card"><strong id="statCategories">0</strong><span>ប្រភេទ</span></div>
+            <div class="progress-card"><strong id="statVideos">0</strong><span>វីដេអូ</span></div>
+            <div class="progress-card"><strong id="statUsage">0</strong><span>សកម្មភាព</span></div>
+          </div>
+
+          <div class="admin-grid">
+            <section class="content-panel">
+              <div class="panel-head"><h2>ការគ្រប់គ្រងវីដេអូ</h2></div>
+              <form id="videoForm" class="admin-form">
+                <label>ចំណងជើងវីដេអូ<input id="videoTitle" type="text" required placeholder="ឧទាហរណ៍៖ ការបើក Microsoft Word" /></label>
+                <label>ប្រភេទវីដេអូ<select id="videoCategory" required></select></label>
+                <label>តំណវីដេអូ (YouTube/Vimeo/MP4 URL)<input id="videoUrl" type="url" placeholder="https://..." /></label>
+                <label>ឬផ្ទុកឯកសារ MP4/WebM<input id="videoFile" type="file" accept="video/mp4,video/webm,video/ogg" /></label>
+                <div id="videoMessage" class="auth-message"></div>
+                <button class="btn" type="submit"><i class="fa-solid fa-cloud-arrow-up"></i> រក្សាទុកវីដេអូ</button>
+              </form>
+              <div id="videoList" class="admin-list"></div>
+            </section>
+
+            <aside class="content-panel">
+              <div class="panel-head"><h2>ប្រភេទសិក្សា</h2></div>
+              <form id="categoryForm" class="mini-form"><input id="categoryName" type="text" required placeholder="ឈ្មោះប្រភេទថ្មី" /><button class="btn" type="submit"><i class="fa-solid fa-plus"></i></button></form>
+              <div id="categoryList" class="admin-list"></div>
+
+              <div class="panel-head admin-users-head"><h2>សិស្ស</h2></div>
+              <div id="studentList" class="admin-list"></div>
+
+              <div class="panel-head admin-users-head"><h2>សកម្មភាពថ្មីៗ</h2></div>
+              <div id="usageList" class="admin-list"></div>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script src="js/data.js"></script>
+    <script src="js/navigation.js"></script>
+    <script src="js/admin.js"></script>
+  </body>
+</html>

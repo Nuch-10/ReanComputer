@@ -268,7 +268,12 @@ const STORAGE_KEYS = {
   lastLesson: 'studentai.lastLesson',
   achievements: 'studentai.achievements',
   darkMode: 'studentai.darkMode',
-  preference: 'studentai.preference'
+  preference: 'studentai.preference',
+  users: 'studentai.users',
+  session: 'studentai.session',
+  usageLogs: 'studentai.usageLogs',
+  categories: 'studentai.categories',
+  videos: 'studentai.videos'
 };
 
 function safeJSONParse(value, fallback) {
@@ -326,6 +331,20 @@ function getLastLesson() {
 
 function setLastLesson(courseId, lessonId) {
   setStorage(STORAGE_KEYS.lastLesson, { courseId, lessonId });
+}
+
+function logUsage(type, details = {}) {
+  const logs = getStorage(STORAGE_KEYS.usageLogs, []);
+  const session = getStorage(STORAGE_KEYS.session, null);
+  logs.unshift({
+    id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    type,
+    userId: session ? session.id : null,
+    userName: session ? session.name : 'ភ្ញៀវ',
+    createdAt: new Date().toISOString(),
+    ...details
+  });
+  setStorage(STORAGE_KEYS.usageLogs, logs.slice(0, 1000));
 }
 
 function getCourseById(courseId) {

@@ -74,6 +74,12 @@
   .lesson-list { max-height: 280px; overflow-y: auto; }
   .panel-head { align-items: flex-start; flex-direction: column; }
   .mini-form { align-items: stretch; }
+  .admin-grid { grid-template-columns: 1fr; }
+  .admin-heading { align-items: flex-start; }
+  .admin-heading .btn { width: auto; }
+  .account-button span { display: none; }
+  .account-button { padding: 8px 10px; }
+  .account-login { width: auto; }
   .mini-form > * { width: 100%; }
   .course-card .course-cover { height: 140px; }
   .section { padding: 72px 0; }

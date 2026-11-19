@@ -36,6 +36,30 @@ document.addEventListener('DOMContentLoaded', () => {
   renderQuickProgress();
 });
 
+function getCourseIconClass(courseId) {
+  const icons = {
+    'basic-computer': 'fa-laptop',
+    typing: 'fa-keyboard',
+    word: 'fa-file-word',
+    excel: 'fa-file-excel',
+    powerpoint: 'fa-file-powerpoint',
+    'internet-safety': 'fa-shield-halved',
+    'practical-skills': 'fa-rocket'
+  };
+  return icons[courseId] || 'fa-book-open';
+}
+
+function decorateCourseCards(container) {
+  container.querySelectorAll('.course-card').forEach((card) => {
+    const link = card.querySelector('a[href*="course.html?id="]');
+    const cover = card.querySelector('.course-cover');
+    if (!link || !cover) return;
+    const courseId = new URL(link.href, window.location.href).searchParams.get('id');
+    cover.innerHTML = `<i class="fa-solid ${getCourseIconClass(courseId)}" aria-hidden="true"></i>`;
+    cover.setAttribute('aria-label', 'រូបតំណាងវគ្គសិក្សា');
+  });
+}
+
 function renderHomePage() {
   const featured = courses.slice(0, 6);
   const target = document.querySelector('#featuredCourses');
@@ -130,6 +154,7 @@ function renderCoursePage() {
 
   if (project) {
     const desc = course.project || 'លំហាត់បញ្ចប់វគ្គ';
+    const videos = getStorage(STORAGE_KEYS.videos, []).filter((video) => video.categoryId === course.id);
     project.innerHTML = `
       <h3>គម្រោងចុងក្រោយ</h3>
       <p>${desc}</p>
@@ -137,8 +162,62 @@ function renderCoursePage() {
         <a href="lesson.html?course=${course.id}&lesson=${course.lessons[0].id}" class="btn">ចាប់ផ្តើមមេរៀន</a>
         <a href="quiz.html?course=${course.id}" class="btn btn-secondary">ធ្វើតេស្ត</a>
       </div>
+      <div class="course-videos"><h3>វីដេអូមេរៀន</h3>${renderCourseVideos(videos)}</div>
     `;
+    bindCourseVideos(project, course);
   }
+}
+
+function renderCourseVideos(videos) {
+  if (!videos.length) return '<div class="empty-state">គ្មានវីដេអូសម្រាប់វគ្គនេះនៅឡើយទេ។</div>';
+  return videos.map((video) => `
+    <article class="video-card" data-video-id="${video.id}" data-blob-id="${video.blobId || ''}" data-source="${escapeHtmlAttribute(video.source)}">
+      <h4>${escapeHtmlAttribute(video.title)}</h4>
+      ${video.source ? '<div class="video-frame"><iframe title="' + escapeHtmlAttribute(video.title) + '" loading="lazy" allowfullscreen></iframe></div>' : '<div class="video-frame"><video controls></video></div>'}
+    </article>
+  `).join('');
+}
+
+function escapeHtmlAttribute(value) {
+  return (value || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+async function bindCourseVideos(container, course) {
+  for (const card of container.querySelectorAll('[data-video-id]')) {
+    const source = card.dataset.source;
+    const blobId = card.dataset.blobId;
+    if (source) {
+      const frame = card.querySelector('iframe');
+      frame.src = videoEmbedUrl(source);
+    } else if (blobId) {
+      const blob = await getCourseVideoBlob(blobId);
+      if (blob) card.querySelector('video').src = URL.createObjectURL(blob);
+    }
+    card.addEventListener('play', () => logUsage('video', { courseId: course.id, videoId: card.dataset.videoId }), true);
+  }
+}
+
+function videoEmbedUrl(url) {
+  if (/youtu(?:\.be|be\.com)/.test(url)) {
+    const match = url.match(/(?:youtu\.be\/|v=)([A-Za-z0-9_-]+)/);
+    return match ? `https://www.youtube.com/embed/${match[1]}` : url;
+  }
+  return url;
+}
+
+function getCourseVideoBlob(id) {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open('ReanComputerVideos', 1);
+    request.onsuccess = () => {
+      const db = request.result;
+      const tx = db.transaction('files', 'readonly');
+      const get = tx.objectStore('files').get(id);
+      get.onsuccess = () => resolve(get.result);
+      get.onerror = () => reject(get.error);
+      tx.oncomplete = () => db.close();
+    };
+    request.onerror = () => reject(request.error);
+  });
 }
 
 function renderLessonPage() {
@@ -237,6 +316,7 @@ function renderLessonPage() {
         list.push(key);
         setCompletedLessons(list);
         updateAchievements();
+        logUsage('lesson', { courseId: course.id, lessonId: lesson.id, lessonTitle: lesson.title });
       }
       setLastLesson(course.id, lesson.id);
       finishBtn.classList.add('btn-success');

@@ -40,3 +40,48 @@
 .list-plain { list-style: none; padding: 0; margin: 0; }
 
 .inline-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.account-menu { position: relative; }
+.account-button { display: inline-flex; align-items: center; gap: 8px; height: 42px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--text); cursor: pointer; font-weight: 700; }
+.account-button i { color: var(--primary); font-size: 1.15rem; }
+.account-dropdown { display: none; position: absolute; top: calc(100% + 8px); right: 0; min-width: 210px; padding: 8px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); box-shadow: var(--shadow); z-index: 70; }
+.account-menu.open .account-dropdown { display: grid; }
+.account-dropdown a, .account-dropdown button { display: flex; align-items: center; gap: 9px; width: 100%; padding: 10px 12px; border-radius: 10px; background: transparent; color: var(--text); text-decoration: none; cursor: pointer; text-align: left; }
+.account-dropdown a:hover, .account-dropdown button:hover { background: var(--primary-soft); }
+.account-login { white-space: nowrap; }
+
+.auth-page { min-height: 100vh; display: grid; place-items: center; padding: 32px 16px; background: linear-gradient(135deg, #edf5ff, #f8fbff); }
+body.dark-mode .auth-page { background: linear-gradient(135deg, #0b1526, #101e34); }
+.auth-shell { width: min(100%, 480px); padding: 30px; border: 1px solid var(--border); border-radius: 24px; background: var(--surface); box-shadow: var(--shadow); }
+.auth-brand { display: inline-flex; align-items: center; gap: 10px; color: var(--text); font-weight: 800; margin-bottom: 22px; }
+.auth-tabs { display: grid; grid-template-columns: 1fr 1fr; padding: 5px; border-radius: 14px; background: var(--surface-alt); margin-bottom: 22px; }
+.auth-tab { padding: 11px; border-radius: 10px; background: transparent; color: var(--muted); cursor: pointer; font-weight: 800; }
+.auth-tab.active { background: var(--surface); color: var(--primary); box-shadow: 0 4px 12px rgba(15,38,80,.08); }
+.auth-form { display: grid; gap: 14px; }
+.auth-form h1 { margin: 2px 0 0; font-size: 1.8rem; }
+.auth-lead { color: var(--muted); margin: 0 0 8px; }
+.auth-form label, .admin-form label { display: grid; gap: 8px; font-weight: 700; }
+.auth-form input, .auth-form input[type="email"], .auth-form input[type="password"], .admin-form input, .admin-form input[type="email"], .admin-form input[type="url"], .admin-form input[type="file"], .admin-form select { width: 100%; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--text); padding: 12px 14px; }
+.auth-submit { width: 100%; margin-top: 4px; }
+.auth-message { min-height: 0; }
+.auth-back { text-align: center; margin: 20px 0 0; }
+
+.admin-page { min-height: calc(100vh - 76px); padding: 38px 0 70px; background: var(--surface-alt); }
+.admin-heading { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.admin-heading h1 { margin: 10px 0 0; }
+.admin-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(280px, .75fr); gap: 22px; margin-top: 22px; }
+.admin-form { display: grid; gap: 14px; }
+.admin-list { display: grid; gap: 8px; margin-top: 18px; }
+.admin-row, .usage-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-alt); }
+.admin-row > div, .usage-row > div { display: grid; gap: 3px; }
+.admin-row small, .usage-row small { color: var(--muted); }
+.admin-delete { width: 36px; height: 36px; border-radius: 10px; background: var(--danger-soft); color: var(--danger); cursor: pointer; }
+.admin-users-head { margin-top: 28px; }
+.usage-row { justify-content: flex-start; }
+.usage-row > i { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 10px; background: var(--primary-soft); color: var(--primary); }
+
+.course-videos { display: grid; gap: 16px; margin-top: 28px; padding-top: 22px; border-top: 1px solid var(--border); }
+.video-card { border: 1px solid var(--border); border-radius: 16px; overflow: hidden; background: var(--surface-alt); }
+.video-card h4 { margin: 0; padding: 14px 16px; }
+.video-frame { aspect-ratio: 16 / 9; background: #05080d; }
+.video-frame iframe, .video-frame video { width: 100%; height: 100%; border: 0; }
