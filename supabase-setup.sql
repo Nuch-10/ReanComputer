@@ -17,6 +17,10 @@ create table if not exists public.videos (
 alter table public.categories enable row level security;
 alter table public.videos enable row level security;
 
+grant usage on schema public to anon, authenticated;
+grant select, insert, delete on public.categories to anon, authenticated;
+grant select, insert, delete on public.videos to anon, authenticated;
+
 drop policy if exists "Public read categories" on public.categories;
 create policy "Public read categories" on public.categories for select using (true);
 drop policy if exists "Public write categories" on public.categories;
