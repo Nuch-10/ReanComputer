@@ -20,7 +20,7 @@
   .brand { min-width: 0; }
   .brand-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .nav-actions { margin-left: auto; }
-  .nav-actions > .btn { display: none; }
+  .nav-actions > a.btn:not(.account-login) { display: none; }
   .nav-links { display: none; }
   .mobile-menu-toggle { display: inline-flex !important; }
   .navbar { position: relative; }
@@ -48,9 +48,11 @@
   .brand-mark { width: 40px; height: 40px; border-radius: 12px; }
   .brand { font-size: 1rem; gap: 8px; }
   .brand-text small { display: none; }
-  .nav-actions { gap: 8px; min-width: 0; flex: 1; justify-content: flex-end; }
-  .search-wrap { flex: 1; min-width: 0; }
-  .search-wrap input { width: 100%; min-width: 0; padding-left: 38px; }
+  .nav-actions { gap: 6px; min-width: 0; flex: 0 1 auto; justify-content: flex-end; }
+  .search-wrap { flex: 0 0 40px; min-width: 40px; }
+  .search-wrap input { width: 40px; height: 40px; min-width: 40px; padding: 0; color: transparent; cursor: text; }
+  .search-wrap input::placeholder { color: transparent; }
+  .search-wrap .fa-search { left: 50%; }
   .search-results { left: 0; right: auto; width: min(360px, calc(100vw - 24px)); }
   .icon-btn { flex: 0 0 40px; width: 40px; height: 40px; }
   .hero { padding-top: 50px; }
@@ -79,8 +81,13 @@
   .admin-heading .btn { width: auto; }
   .account-button span { display: none; }
   .account-button { padding: 8px 10px; }
-  .account-login { width: auto; }
+  .account-login { display: inline-flex !important; flex: 0 0 auto; width: auto; height: 40px; padding: 10px 12px; }
   .mini-form > * { width: 100%; }
   .course-card .course-cover { height: 140px; }
   .section { padding: 72px 0; }
+}
+
+@media (max-width: 420px) {
+  .brand { flex: 0 0 auto; font-size: .85rem; }
+  .brand-text { display: block; }
 }
