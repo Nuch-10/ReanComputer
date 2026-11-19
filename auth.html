@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="km">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ចូលប្រើប្រាស់ | រៀនកុំព្យូទ័រ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+  </head>
+  <body data-page="auth">
+    <main class="auth-page">
+      <section class="auth-shell">
+        <a href="index.html" class="auth-brand"><span class="brand-mark"><i class="fa-solid fa-laptop"></i></span><span>រៀនកុំព្យូទ័រ</span></a>
+        <div class="auth-tabs" role="tablist">
+          <button type="button" class="auth-tab active" data-auth-tab="login">ចូលគណនី</button>
+          <button type="button" class="auth-tab" data-auth-tab="signup">បង្កើតគណនី</button>
+        </div>
+
+        <form id="loginForm" class="auth-form">
+          <h1>សូមស្វាគមន៍ត្រឡប់មកវិញ</h1>
+          <p class="auth-lead">ចូលគណនីដើម្បីបន្តការរៀន និងរក្សាវឌ្ឍនភាព។</p>
+          <label>អ៊ីមែល<input id="loginEmail" type="email" autocomplete="email" required placeholder="name@example.com" /></label>
+          <label>ពាក្យសម្ងាត់<input id="loginPassword" type="password" autocomplete="current-password" required placeholder="ពាក្យសម្ងាត់" /></label>
+          <div id="loginMessage" class="auth-message"></div>
+          <button class="btn auth-submit" type="submit"><i class="fa-solid fa-right-to-bracket"></i> ចូលប្រើប្រាស់</button>
+        </form>
+
+        <form id="signupForm" class="auth-form hidden">
+          <h1>បង្កើតគណនីសិស្ស</h1>
+          <p class="auth-lead">ចុះឈ្មោះសម្រាប់តាមដានវគ្គ និងលទ្ធផលរៀន។</p>
+          <label>ឈ្មោះពេញ<input id="signupName" type="text" autocomplete="name" required placeholder="ឈ្មោះរបស់អ្នក" /></label>
+          <label>អ៊ីមែល<input id="signupEmail" type="email" autocomplete="email" required placeholder="name@example.com" /></label>
+          <label>ពាក្យសម្ងាត់<input id="signupPassword" type="password" autocomplete="new-password" minlength="6" required placeholder="យ៉ាងហោចណាស់ 6 តួ" /></label>
+          <div id="signupMessage" class="auth-message"></div>
+          <button class="btn auth-submit" type="submit"><i class="fa-solid fa-user-plus"></i> បង្កើតគណនី</button>
+        </form>
+
+        <p class="auth-back"><a href="index.html"><i class="fa-solid fa-arrow-left"></i> ត្រឡប់ទៅទំព័រដើម</a></p>
+      </section>
+    </main>
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+  </body>
+</html>

@@ -13,6 +13,28 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  const navActions = document.querySelector('.nav-actions');
+  if (navActions && !document.querySelector('[data-account-control]')) {
+    const session = getStorage(STORAGE_KEYS.session, null);
+    const account = document.createElement(session ? 'div' : 'a');
+    account.setAttribute('data-account-control', 'true');
+    if (session) {
+      account.className = 'account-menu';
+      account.innerHTML = `<button type="button" class="account-button" aria-label="គណនី"><i class="fa-solid fa-user-circle"></i><span>${session.name}</span></button><div class="account-dropdown">${session.role === 'admin' ? '<a href="admin.html"><i class="fa-solid fa-gauge"></i> ផ្ទាំងគ្រប់គ្រង</a>' : '<a href="progress.html"><i class="fa-solid fa-chart-line"></i> វឌ្ឍនភាព</a>'}<button type="button" id="logoutButton"><i class="fa-solid fa-right-from-bracket"></i> ចេញ</button></div>`;
+      const button = account.querySelector('.account-button');
+      button.addEventListener('click', () => account.classList.toggle('open'));
+      account.querySelector('#logoutButton').addEventListener('click', () => {
+        setStorage(STORAGE_KEYS.session, null);
+        window.location.href = 'auth.html';
+      });
+    } else {
+      account.className = 'btn btn-secondary account-login';
+      account.href = 'auth.html';
+      account.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> ចូល';
+    }
+    navActions.prepend(account);
+  }
+
   const menuButton = document.querySelector('.mobile-menu-toggle');
   const navPanel = document.querySelector('.nav-panel');
   if (menuButton && navPanel) {
