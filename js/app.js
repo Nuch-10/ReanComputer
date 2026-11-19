@@ -130,7 +130,7 @@ function renderCoursesPage() {
   }
 }
 
-function renderCoursePage() {
+async function renderCoursePage() {
   const params = new URLSearchParams(window.location.search);
   const courseId = params.get('id') || 'basic-computer';
   const course = getCourseById(courseId);
@@ -154,7 +154,34 @@ function renderCoursePage() {
 
   if (project) {
     const desc = course.project || 'លំហាត់បញ្ចប់វគ្គ';
-    const videos = getStorage(STORAGE_KEYS.videos, []).filter((video) => video.categoryId === course.id);
+    let videos = getStorage(STORAGE_KEYS.videos, []).filter((video) => video.categoryId === course.id);
+    try {
+      const remoteVideos = await reanSupabase.getVideos();
+      videos = remoteVideos
+        .filter((video) => video.category_id === course.id)
+        .map((video) => ({
+          id: video.id,
+          title: video.title,
+          categoryId: video.category_id,
+          source: video.source || '',
+          blobId: null,
+          fileName: video.file_name || '',
+          filePath: video.file_path || null,
+          createdAt: video.created_at
+        }));
+      setStorage(STORAGE_KEYS.videos, remoteVideos.map((video) => ({
+        id: video.id,
+        title: video.title,
+        categoryId: video.category_id,
+        source: video.source || '',
+        blobId: null,
+        fileName: video.file_name || '',
+        filePath: video.file_path || null,
+        createdAt: video.created_at
+      })));
+    } catch (error) {
+      console.warn('Could not sync course videos:', error);
+    }
     project.innerHTML = `
       <h3>គម្រោងចុងក្រោយ</h3>
       <p>${desc}</p>
@@ -170,12 +197,17 @@ function renderCoursePage() {
 
 function renderCourseVideos(videos) {
   if (!videos.length) return '<div class="empty-state">គ្មានវីដេអូសម្រាប់វគ្គនេះនៅឡើយទេ។</div>';
-  return videos.map((video) => `
-    <article class="video-card" data-video-id="${video.id}" data-blob-id="${video.blobId || ''}" data-source="${escapeHtmlAttribute(video.source)}">
-      <h4>${escapeHtmlAttribute(video.title)}</h4>
-      ${video.source ? '<div class="video-frame"><iframe title="' + escapeHtmlAttribute(video.title) + '" loading="lazy" allowfullscreen></iframe></div>' : '<div class="video-frame"><video controls></video></div>'}
-    </article>
-  `).join('');
+  return videos.map((video) => {
+    const isDirectVideo = video.source && isDirectVideoUrl(video.source);
+    return `
+      <article class="video-card" data-video-id="${video.id}" data-blob-id="${video.blobId || ''}" data-source="${escapeHtmlAttribute(video.source)}">
+        <h4>${escapeHtmlAttribute(video.title)}</h4>
+        ${video.source || video.blobId
+          ? `<div class="video-frame">${isDirectVideo ? '<video controls preload="metadata"></video>' : video.source ? '<iframe title="' + escapeHtmlAttribute(video.title) + '" loading="lazy" allowfullscreen></iframe>' : '<video controls preload="metadata"></video>'}</div>`
+          : '<div class="empty-state">មិនមានប្រភពវីដេអូ។</div>'}
+      </article>
+    `;
+  }).join('');
 }
 
 function escapeHtmlAttribute(value) {
@@ -187,20 +219,38 @@ async function bindCourseVideos(container, course) {
     const source = card.dataset.source;
     const blobId = card.dataset.blobId;
     if (source) {
-      const frame = card.querySelector('iframe');
-      frame.src = videoEmbedUrl(source);
+      if (isDirectVideoUrl(source)) {
+        card.querySelector('video').src = source;
+      } else {
+        const frame = card.querySelector('iframe');
+        if (frame) frame.src = videoEmbedUrl(source);
+      }
     } else if (blobId) {
       const blob = await getCourseVideoBlob(blobId);
-      if (blob) card.querySelector('video').src = URL.createObjectURL(blob);
+      const video = card.querySelector('video');
+      if (blob && video) {
+        video.src = URL.createObjectURL(blob);
+      } else if (video) {
+        video.insertAdjacentHTML('afterend', '<div class="empty-state">រកមិនឃើញឯកសារវីដេអូក្នុងកម្មវិធីរុករកនេះ។</div>');
+        video.remove();
+      }
     }
     card.addEventListener('play', () => logUsage('video', { courseId: course.id, videoId: card.dataset.videoId }), true);
   }
 }
 
+function isDirectVideoUrl(url) {
+  return /^https?:\/\//i.test(url || '') && /\.(mp4|webm|ogg)(?:$|[?#])/i.test(url);
+}
+
 function videoEmbedUrl(url) {
   if (/youtu(?:\.be|be\.com)/.test(url)) {
-    const match = url.match(/(?:youtu\.be\/|v=)([A-Za-z0-9_-]+)/);
+    const match = url.match(/(?:youtu\.be\/|[?&]v=|\/embed\/|\/shorts\/)([A-Za-z0-9_-]+)/);
     return match ? `https://www.youtube.com/embed/${match[1]}` : url;
+  }
+  if (/vimeo\.com/.test(url)) {
+    const match = url.match(/vimeo\.com(?:\/video)?\/([0-9]+)/);
+    return match ? `https://player.vimeo.com/video/${match[1]}` : url;
   }
   return url;
 }
@@ -208,6 +258,9 @@ function videoEmbedUrl(url) {
 function getCourseVideoBlob(id) {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open('ReanComputerVideos', 1);
+    request.onupgradeneeded = () => {
+      if (!request.result.objectStoreNames.contains('files')) request.result.createObjectStore('files');
+    };
     request.onsuccess = () => {
       const db = request.result;
       const tx = db.transaction('files', 'readonly');

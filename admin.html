@@ -33,7 +33,7 @@
                 <label>ចំណងជើងវីដេអូ<input id="videoTitle" type="text" required placeholder="ឧទាហរណ៍៖ ការបើក Microsoft Word" /></label>
                 <label>ប្រភេទវីដេអូ<select id="videoCategory" required></select></label>
                 <label>តំណវីដេអូ (YouTube/Vimeo/MP4 URL)<input id="videoUrl" type="url" placeholder="https://..." /></label>
-                <label>ឬផ្ទុកឯកសារ MP4/WebM<input id="videoFile" type="file" accept="video/mp4,video/webm,video/ogg" /></label>
+                <label>ឬផ្ទុកឯកសារ MP4/WebM<input id="videoFile" type="file" accept="video/mp4,video/webm,video/ogg" /><small>ឯកសារក្នុងគេហទំព័រនេះរក្សាទុកក្នុងកម្មវិធីរុករកប៉ុណ្ណោះ។ សម្រាប់គេហទំព័រដែលដាក់លើបណ្តាញ សូមប្រើតំណ YouTube/Vimeo/MP4។</small></label>
                 <div id="videoMessage" class="auth-message"></div>
                 <button class="btn" type="submit"><i class="fa-solid fa-cloud-arrow-up"></i> រក្សាទុកវីដេអូ</button>
               </form>
@@ -56,6 +56,7 @@
       </div>
     </main>
     <script src="js/data.js"></script>
+    <script src="js/supabase-client.js"></script>
     <script src="js/navigation.js"></script>
     <script src="js/admin.js"></script>
   </body>
