@@ -9,19 +9,33 @@ if (!session || session.role !== 'admin') {
   initializeAdmin();
 }
 
-function initializeAdmin() {
-  ensureDefaults();
+async function initializeAdmin() {
+  await ensureDefaults();
   bindAdminEvents();
-  renderAll();
+  await renderAll();
 }
 
-function ensureDefaults() {
+async function ensureDefaults() {
   let categories = getStorage(STORAGE_KEYS.categories, null);
-  if (!categories) {
+  if (!categories || !categories.length) {
     categories = courses.map((course) => ({ id: course.id, name: course.title, createdAt: new Date().toISOString() }));
     setStorage(STORAGE_KEYS.categories, categories);
   }
   if (!getStorage(STORAGE_KEYS.videos, null)) setStorage(STORAGE_KEYS.videos, []);
+
+  try {
+    const remoteCategories = await reanSupabase.getCategories();
+    if (remoteCategories.length) {
+      categories = remoteCategories.map((item) => ({ id: item.id, name: item.name, createdAt: item.created_at }));
+      setStorage(STORAGE_KEYS.categories, categories);
+    } else {
+      for (const category of categories) {
+        await reanSupabase.createCategory({ id: category.id, name: category.name, created_at: category.createdAt || new Date().toISOString() });
+      }
+    }
+  } catch (error) {
+    console.warn('Supabase categories unavailable:', error);
+  }
 }
 
 function bindAdminEvents() {
@@ -30,16 +44,22 @@ function bindAdminEvents() {
     window.location.href = 'auth.html';
   });
 
-  document.querySelector('#categoryForm').addEventListener('submit', (event) => {
+  document.querySelector('#categoryForm').addEventListener('submit', async (event) => {
     event.preventDefault();
     const input = document.querySelector('#categoryName');
     const name = input.value.trim();
     if (!name) return;
-    const categories = getStorage(STORAGE_KEYS.categories, []);
-    categories.push({ id: `category-${Date.now()}`, name, createdAt: new Date().toISOString() });
-    setStorage(STORAGE_KEYS.categories, categories);
+    const category = { id: `category-${Date.now()}`, name, createdAt: new Date().toISOString() };
+    try {
+      await reanSupabase.createCategory({ id: category.id, name, created_at: category.createdAt });
+      const categories = getStorage(STORAGE_KEYS.categories, []);
+      categories.push(category);
+      setStorage(STORAGE_KEYS.categories, categories);
+    } catch (error) {
+      console.warn('Could not sync category:', error);
+    }
     input.value = '';
-    renderAll();
+    await renderAll();
   });
 
   document.querySelector('#videoForm').addEventListener('submit', async (event) => {
@@ -56,18 +76,41 @@ function bindAdminEvents() {
 
     let source = url;
     let blobId = null;
+    let filePath = null;
     if (file) {
       if (file.size > 100 * 1024 * 1024) {
         message.innerHTML = '<div class="alert alert-error">ឯកសារមានទំហំធំជាង 100MB។ សូមប្រើតំណវីដេអូ។</div>';
         return;
       }
-      blobId = `video-${Date.now()}`;
-      await saveVideoBlob(blobId, file);
-      source = '';
+      message.innerHTML = '<div class="alert">កំពុងផ្ទុកវីដេអូលើកម្រិលមេឃ…</div>';
+      try {
+        const uploaded = await reanSupabase.uploadVideo(file);
+        source = uploaded.url;
+        filePath = uploaded.path;
+      } catch (error) {
+        blobId = `video-${Date.now()}`;
+        await saveVideoBlob(blobId, file);
+        source = '';
+        message.innerHTML = '<div class="alert alert-error">មិនអាចផ្ទុកទៅ Supabase បានទេ។ វីដេអូត្រូវបានរក្សាទុកក្នុងកម្មវិធីរុករកនេះ។</div>';
+      }
     }
 
+    const video = { id: `video-${Date.now()}`, title, categoryId, source, blobId, fileName: file ? file.name : '', filePath, createdAt: new Date().toISOString() };
+    try {
+      await reanSupabase.createVideo({
+        id: video.id,
+        title,
+        category_id: categoryId,
+        source,
+        file_name: video.fileName,
+        file_path: filePath,
+        created_at: video.createdAt
+      });
+    } catch (error) {
+      console.warn('Could not sync video metadata:', error);
+    }
     const videos = getStorage(STORAGE_KEYS.videos, []);
-    videos.unshift({ id: `video-${Date.now()}`, title, categoryId, source, blobId, fileName: file ? file.name : '', createdAt: new Date().toISOString() });
+    videos.unshift(video);
     setStorage(STORAGE_KEYS.videos, videos);
     document.querySelector('#videoForm').reset();
     message.innerHTML = '<div class="alert alert-success">បានរក្សាទុកវីដេអូ។</div>';
@@ -118,7 +161,30 @@ async function deleteVideoBlob(id) {
   db.close();
 }
 
-function renderAll() {
+async function renderAll() {
+  try {
+    const remoteCategories = await reanSupabase.getCategories();
+    if (remoteCategories.length) {
+      setStorage(STORAGE_KEYS.categories, remoteCategories.map((item) => ({ id: item.id, name: item.name, createdAt: item.created_at })));
+    }
+  } catch (error) {
+    console.warn('Could not load remote categories:', error);
+  }
+  try {
+    const remoteVideos = await reanSupabase.getVideos();
+    setStorage(STORAGE_KEYS.videos, remoteVideos.map((item) => ({
+      id: item.id,
+      title: item.title,
+      categoryId: item.category_id,
+      source: item.source || '',
+      blobId: null,
+      fileName: item.file_name || '',
+      filePath: item.file_path || null,
+      createdAt: item.created_at
+    })));
+  } catch (error) {
+    console.warn('Could not load remote videos:', error);
+  }
   renderStats();
   renderCategories();
   renderVideos();
@@ -145,11 +211,21 @@ function renderCategories() {
     <div class="admin-row"><span>${escapeHtml(category.name)}</span><button type="button" class="admin-delete" data-delete-category="${category.id}" aria-label="លុប"><i class="fa-solid fa-trash"></i></button></div>
   `).join('');
 
-  document.querySelectorAll('[data-delete-category]').forEach((button) => button.addEventListener('click', () => {
+  document.querySelectorAll('[data-delete-category]').forEach((button) => button.addEventListener('click', async () => {
     const id = button.dataset.deleteCategory;
+    try {
+      const affected = getStorage(STORAGE_KEYS.videos, []).filter((item) => item.categoryId === id);
+      for (const video of affected) {
+        await reanSupabase.deleteVideo(video.id);
+        await reanSupabase.deleteVideoFile(video.filePath);
+      }
+      await reanSupabase.deleteCategory(id);
+    } catch (error) {
+      console.warn('Could not delete remote category:', error);
+    }
     setStorage(STORAGE_KEYS.categories, getStorage(STORAGE_KEYS.categories, []).filter((item) => item.id !== id));
     setStorage(STORAGE_KEYS.videos, getStorage(STORAGE_KEYS.videos, []).filter((item) => item.categoryId !== id));
-    renderAll();
+    await renderAll();
   }));
 }
 
@@ -163,9 +239,16 @@ function renderVideos() {
 
   document.querySelectorAll('[data-delete-video]').forEach((button) => button.addEventListener('click', async () => {
     const id = button.dataset.deleteVideo;
+    const video = getStorage(STORAGE_KEYS.videos, []).find((item) => item.id === id);
+    try {
+      await reanSupabase.deleteVideo(id);
+      await reanSupabase.deleteVideoFile(video ? video.filePath : null);
+    } catch (error) {
+      console.warn('Could not delete remote video:', error);
+    }
     await deleteVideoBlob(button.dataset.deleteBlobby);
     setStorage(STORAGE_KEYS.videos, getStorage(STORAGE_KEYS.videos, []).filter((item) => item.id !== id));
-    renderAll();
+    await renderAll();
   }));
 }
 
